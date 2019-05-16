@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script>
+    function fileChange(id) {
+        var file = document.getElementById(id).files[0];
+        var reader = new FileReader();
+        reader.onload = function() {
+            var bytes = new Uint8Array(reader.result);
+            var data = {
+                fileData: bytes
+            };
+            setFile(id, JSON.stringify(data));
+        };
+        reader.readAsArrayBuffer(file);
+    }
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <p> woah check it out </p>
+
+    <button onclick="neat()"> neat neat neat </button>
+
+    <label for="file1-input">
+        <span>file 1</span>
+        <input type="file" id="file1-input" onchange="fileChange('file1-input')">
+    </label>
+
+</head>
+<body>
+
+</body>
+</html>
