@@ -1,36 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<script>
-    function fileChange(id) {
-        var file = document.getElementById(id).files[0];
-        var reader = new FileReader();
-        reader.onload = function() {
-            var bytes = new Uint8Array(reader.result);
-            var data = {
-                fileData: bytes
-            };
-            setFile(id, JSON.stringify(data));
-        };
-        reader.readAsArrayBuffer(file);
-    }
-</script>
 
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Zipper</title>
 
-    <p> woah check it out </p>
-
-    <button onclick="neat()"> neat neat neat </button>
-
-    <label for="file1-input">
-        <span>file 1</span>
-        <input type="file" id="file1-input" onchange="fileChange('file1-input')">
-    </label>
-
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 </head>
-<body>
 
+<script>
+    async function handleMerge() {
+        const file1 = $("#file1-input")[0].files[0];
+        if (!file1) {
+            alert("yo you gotta select a file for PDF 1");
+            return;
+        }
+
+        const file2 = $("#file2-input")[0].files[0];
+        if (!file2) {
+            alert("hey dawg you gotta select a file for PDF 2");
+            return;
+        }
+
+        try {
+            const mergeFileName = await mergeFiles(file1.name, file2.name);
+            alert("Success! ok it's called this: [" + mergeFileName + "]");
+        } catch (err) {
+            alert("Merge Failed! uh oh spaghetti-Os\n" + err.message);
+        }
+    }
+</script>
+
+<body>
+    <h1>Zipper</h1>
+
+    <h4>PDF 1</h4>
+    <div class="input-group mb-3">
+        <div class="custom-file">
+            <input id="file1-input" type="file" class="custom-file-input">
+            <label for="file1-input" class="custom-file-label">Choose PDF 1</label>
+        </div>
+    </div>
+
+    <h4>PDF 2</h4>
+    <div class="input-group mb-3">
+        <div class="custom-file">
+            <input id="file2-input" type="file" class="custom-file-input">
+            <label for="file2-input" class="custom-file-label">Choose PDF 2</label>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" onclick="handleMerge()">
+        Merge!
+    </button>
+
+    <script>
+        const inputIds = ["#file1-input", "#file2-input"];
+        inputIds.forEach(inputId => {
+            $(inputId).on("change",function(){
+                var fileName = $(this)[0].files[0].name;
+                $(this).next('.custom-file-label').html(fileName);
+            })
+        });
+    </script>
 </body>
 </html>
