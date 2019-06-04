@@ -193,43 +193,56 @@ func patchSourceObjectNumbers(ctxSource, ctxDest *pdf.Context) {
 	log.Debug.Printf("patchSourceObjectNumbers end")
 }
 
-func appendSourcePageTreeToDestPageTree(ctxSource, ctxDest *pdf.Context) error {
+func ZipperMergePageTrees(ctx2, ctx1 *pdf.Context, rev2, rev1 bool) error {
 
-	log.Debug.Println("appendSourcePageTreeToDestPageTree begin")
+	log.Debug.Println("ZipperMergePageTrees begin")
 
-	indRefPageTreeRootDictSource, err := ctxSource.Pages()
+	indRefPageTreeRootDict1, err := ctx1.Pages()
 	if err != nil {
 		return err
 	}
+	pageTreeRootDict1, _ := ctx1.XRefTable.DereferenceDict(*indRefPageTreeRootDict1)
 
-	pageTreeRootDictSource, _ := ctxSource.XRefTable.DereferenceDict(*indRefPageTreeRootDictSource)
-	pageCountSource := pageTreeRootDictSource.IntEntry("Count")
-
-	indRefPageTreeRootDictDest, err := ctxDest.Pages()
+	indRefPageTreeRootDict2, err := ctx2.Pages()
 	if err != nil {
 		return err
 	}
+	pageTreeRootDict2, _ := ctx2.XRefTable.DereferenceDict(*indRefPageTreeRootDict2)
 
-	pageTreeRootDictDest, _ := ctxDest.XRefTable.DereferenceDict(*indRefPageTreeRootDictDest)
-	pageCountDest := pageTreeRootDictDest.IntEntry("Count")
+	pages1 := pageTreeRootDict1.ArrayEntry("Kids")
+	pages2 := pageTreeRootDict2.ArrayEntry("Kids")
 
-	a := pageTreeRootDictDest.ArrayEntry("Kids")
-	log.Debug.Printf("Kids before: %v\n", a)
+	//pageTreeRootDict2.Insert("Parent", *indRefPageTreeRootDict1)
 
-	pageTreeRootDictSource.Insert("Parent", *indRefPageTreeRootDictDest)
+	// pop and then append a page from ctx1 and then ctx2 until the arrays are empty
+	// if one array runs out first, choose pages from the other until it is empty
+	a := pdf.Array{}
+	for len(pages1) > 0 || len(pages2) > 0 {
+		a, pages1 = appendNextPage(a, pages1, rev1)
+		a, pages2 = appendNextPage(a, pages2, rev2)
+	}
 
-	// The source page tree gets appended on to the dest page tree.
-	a = append(a, *indRefPageTreeRootDictSource)
-	log.Debug.Printf("Kids after: %v\n", a)
+	pageTreeRootDict1.Update("Count", pdf.Integer(len(a)))
+	pageTreeRootDict1.Update("Kids", a)
+	ctx1.PageCount = len(a)
 
-	pageTreeRootDictDest.Update("Count", pdf.Integer(*pageCountDest+*pageCountSource))
-	pageTreeRootDictDest.Update("Kids", a)
-
-	ctxDest.PageCount += ctxSource.PageCount
-
-	log.Debug.Println("appendSourcePageTreeToDestPageTree end")
+	log.Debug.Println("ZipperMergePageTrees end")
 
 	return nil
+}
+
+func appendNextPage(dest, src pdf.Array, reverse bool) (pdf.Array, pdf.Array) {
+	if len(src) == 0 {
+		return dest, src
+	}
+	if reverse {
+		dest = append(dest, src[len(src)-1])
+		src = src[:len(src)-1]
+		return dest, src
+	}
+	dest = append(dest, src[0])
+	src = src[1:]
+	return dest, src
 }
 
 func appendSourceObjectsToDest(ctxSource, ctxDest *pdf.Context) {
@@ -274,14 +287,14 @@ func mergeDuplicateObjNumberIntSets(ctxSource, ctxDest *pdf.Context) {
 }
 
 // ZipperMergeXRefTables merges Context ctxSource into ctxDest by appending its page tree.
-func ZipperMergeXRefTables(ctxSource, ctxDest *pdf.Context) (err error) {
+func ZipperMergeXRefTables(ctxSource, ctxDest *pdf.Context, revSource, revDest bool) (err error) {
 
 	// Sweep over ctxSource cross ref table and ensure valid object numbers in ctxDest's space.
 	patchSourceObjectNumbers(ctxSource, ctxDest)
 
 	// Append ctxSource pageTree to ctxDest pageTree.
-	log.Debug.Println("appendSourcePageTreeToDestPageTree")
-	err = appendSourcePageTreeToDestPageTree(ctxSource, ctxDest)
+	log.Debug.Println("ZipperMergePageTrees")
+	err = ZipperMergePageTrees(ctxSource, ctxDest, revSource, revDest)
 	if err != nil {
 		return err
 	}

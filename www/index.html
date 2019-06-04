@@ -7,6 +7,8 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="zipper.css" />
+
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -28,8 +30,11 @@
             return;
         }
 
+        const rev1 = $("#file1-reverse")[0].checked;
+        const rev2 = $("#file2-reverse")[0].checked;
+
         try {
-            const mergeFileName = await mergeFiles(file1.name, file2.name);
+            const mergeFileName = await mergeFiles(file1.name, file2.name, rev1, rev2);
             alert("Success! ok it's called this: [" + mergeFileName + "]");
         } catch (err) {
             alert("Merge Failed! uh oh spaghetti-Os\n" + err.message);
@@ -38,27 +43,39 @@
 </script>
 
 <body>
-    <h1>Zipper</h1>
+    <div class="container">
+        <h1>Zipper</h1>
 
-    <h4>PDF 1</h4>
-    <div class="input-group mb-3">
-        <div class="custom-file">
-            <input id="file1-input" type="file" class="custom-file-input">
-            <label for="file1-input" class="custom-file-label">Choose PDF 1</label>
+        <h4>PDF 1</h4>
+        <div class="input-group mb-3">
+            <div class="custom-file">
+                <input id="file1-input" type="file" class="custom-file-input">
+                <label for="file1-input" class="custom-file-label">Choose PDF 1</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input id="file1-reverse" type="checkbox" class="form-check-input"/>
+                <label for="file1-reverse" class="form-check-label">Reverse</label>
+            </div>
+        </div>
+
+        <h4>PDF 2</h4>
+        <div class="input-group mb-3">
+            <div class="custom-file">
+                <input id="file2-input" type="file" class="custom-file-input">
+                <label for="file2-input" class="custom-file-label">Choose PDF 2</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input id="file2-reverse" type="checkbox" class="form-check-input" checked/>
+                <label for="file2-reverse" class="form-check-label">Reverse</label>
+            </div>
+        </div>
+
+        <div id="button-container">
+            <button type="button" class="btn btn-primary btn-lg" onclick="handleMerge()">
+                Merge Files
+            </button>
         </div>
     </div>
-
-    <h4>PDF 2</h4>
-    <div class="input-group mb-3">
-        <div class="custom-file">
-            <input id="file2-input" type="file" class="custom-file-input">
-            <label for="file2-input" class="custom-file-label">Choose PDF 2</label>
-        </div>
-    </div>
-
-    <button type="button" class="btn btn-primary" onclick="handleMerge()">
-        Merge!
-    </button>
 
     <script>
         const inputIds = ["#file1-input", "#file2-input"];

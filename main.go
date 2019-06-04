@@ -12,15 +12,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tylersammann/zipper/static"
-
 	pdf "github.com/hhrutter/pdfcpu/pkg/pdfcpu"
+	"github.com/tylersammann/zipper/static"
 	"github.com/zserge/lorca"
 )
 
-func mergeFiles(fileName1, fileName2 string) string {
-	fmt.Printf("file1 %s\n", fileName1)
-	fmt.Printf("file2 %s\n", fileName2)
+func mergeFiles(fileName1, fileName2 string, rev1, rev2 bool) string {
+	fmt.Printf("file1 %s reverse %v\n", fileName1, rev1)
+	fmt.Printf("file2 %s reverse %v\n", fileName2, rev2)
 
 	mergeFilename := fmt.Sprintf("%s_%s_%v.pdf",
 		strings.Split(fileName1, ".")[0],
@@ -46,10 +45,10 @@ func mergeFiles(fileName1, fileName2 string) string {
 
 	if ctx2.XRefTable.Version() < pdf.V15 {
 		v, _ := pdf.PDFVersion("1.5")
-		ctx1.XRefTable.RootVersion = &v
+		ctx2.XRefTable.RootVersion = &v
 	}
 
-	err = zippermerge.ZipperMergeXRefTables(ctx2, ctx1)
+	err = zippermerge.ZipperMergeXRefTables(ctx2, ctx1, rev2, rev1)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +67,7 @@ func mergeFiles(fileName1, fileName2 string) string {
 
 func main() {
 	// Start up the browser window
-	ui, err := lorca.New("", "", 480, 320)
+	ui, err := lorca.New("", "", 480, 340)
 	if err != nil {
 		log.Fatal(err)
 	}
