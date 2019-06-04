@@ -214,17 +214,17 @@ func ZipperMergePageTrees(ctx2, ctx1 *pdf.Context, rev2, rev1 bool) error {
 
 	//pageTreeRootDict2.Insert("Parent", *indRefPageTreeRootDict1)
 
-	// pop and then append a page from ctx1 and then ctx2 until the arrays are empty
+	// pop and then append mergedPages page from ctx1 and then ctx2 until the arrays are empty
 	// if one array runs out first, choose pages from the other until it is empty
-	a := pdf.Array{}
+	mergedPages := pdf.Array{}
 	for len(pages1) > 0 || len(pages2) > 0 {
-		a, pages1 = appendNextPage(a, pages1, rev1)
-		a, pages2 = appendNextPage(a, pages2, rev2)
+		mergedPages, pages1 = appendNextPage(mergedPages, pages1, rev1)
+		mergedPages, pages2 = appendNextPage(mergedPages, pages2, rev2)
 	}
 
-	pageTreeRootDict1.Update("Count", pdf.Integer(len(a)))
-	pageTreeRootDict1.Update("Kids", a)
-	ctx1.PageCount = len(a)
+	pageTreeRootDict1.Update("Count", pdf.Integer(len(mergedPages)))
+	pageTreeRootDict1.Update("Kids", mergedPages)
+	ctx1.PageCount = len(mergedPages)
 
 	log.Debug.Println("ZipperMergePageTrees end")
 
