@@ -24,7 +24,7 @@ func mergeFiles(fileName1, fileName2 string, rev1, rev2 bool) string {
 	mergeFilename := fmt.Sprintf("%s_%s_%v.pdf",
 		strings.Split(fileName1, ".")[0],
 		strings.Split(fileName2, ".")[0],
-		time.Now().Format("2006-01-02T15_04_05-99"))
+		time.Now().Format("2006-01-02T15_04_05"))
 
 	config := pdf.NewDefaultConfiguration()
 
