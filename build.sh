@@ -14,9 +14,11 @@ build_for_platform() {
     local output_name="${PROJECT_NAME}-${GOOS}-${GOARCH}"
     if [[ ${GOOS} = "windows" ]]; then
         output_name+='.exe'
+        GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags "-H windowsgui" -o "${BUILD_DIR}/${output_name}" main.go
+    else
+        GOOS=${GOOS} GOARCH=${GOARCH} go build -o "${BUILD_DIR}/${output_name}" main.go
     fi
 
-    GOOS=${GOOS} GOARCH=${GOARCH} go build -o "${BUILD_DIR}/${output_name}" main.go
 }
 
 platforms=("linux/amd64" "darwin/amd64" "windows/amd64")
