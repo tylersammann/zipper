@@ -24,7 +24,7 @@ func mergeFiles(fileName1, fileName2 string, rev1, rev2 bool) string {
 	mergeFilename := fmt.Sprintf("%s_%s_%v.pdf",
 		strings.Split(fileName1, ".")[0],
 		strings.Split(fileName2, ".")[0],
-		time.Now().Format("2006-01-02T15:04:05.99"))
+		time.Now().Format("2006-01-02T15_04_05-99"))
 
 	config := pdf.NewDefaultConfiguration()
 
@@ -67,7 +67,7 @@ func mergeFiles(fileName1, fileName2 string, rev1, rev2 bool) string {
 
 func main() {
 	// Start up the browser window
-	ui, err := lorca.New("", "", 480, 340)
+	ui, err := lorca.New("", "", 480, 380)
 	if err != nil {
 		log.Fatal(err)
 	}
